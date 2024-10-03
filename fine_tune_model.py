@@ -6,7 +6,6 @@ from sklearn.model_selection import train_test_split
 from datasets import IterableDataset
 import numpy as np
 
-# Function to load video data and labels
 def load_videos_from_folder(folder):
     videos = []
     labels = []
@@ -15,10 +14,9 @@ def load_videos_from_folder(folder):
         for video_file in os.listdir(label_folder):
             video_path = os.path.join(label_folder, video_file)
             videos.append(video_path)
-            labels.append(1 if label == "violence" else 0)  # 1 for violence, 0 for non-violence
+            labels.append(1 if label == "violence" else 0) 
     return videos, labels
 
-# Check if the video is in a readable format by OpenCV
 def check_video_format(video_path):
     video = cv2.VideoCapture(video_path)
     

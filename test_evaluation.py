@@ -5,8 +5,6 @@ from transformers import VideoMAEForVideoClassification, AutoFeatureExtractor
 from sklearn.metrics import classification_report
 from datasets import IterableDataset
 
-# Generator function for streaming videos in the test set
-# Generator function for streaming videos in the test set
 def video_generator(folder, num_frames=16):
     for label in os.listdir(folder):
         label_folder = os.path.join(folder, label)
@@ -16,7 +14,6 @@ def video_generator(folder, num_frames=16):
             video = cv2.VideoCapture(video_path)
             frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
             
-            # Calculate frame sampling rate to get `num_frames` evenly spaced frames
             sampling_rate = max(1, frame_count // num_frames)
 
             for i in range(num_frames):

@@ -7,7 +7,7 @@ from transformers import AutoModelForVideoClassification, AutoFeatureExtractor
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-# Load the model and feature extractor from Hugging Face
+# Load the model and feature extractor from Hugging Face (open source - I can provide the link to this model in the ReadME)
 model_name = "MCG-NJU/videomae-large"
 model = AutoModelForVideoClassification.from_pretrained(model_name).to(device)
 feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
@@ -17,10 +17,10 @@ model.eval()
 #(0 for webcam or provide a video file path)
 video_capture = cv2.VideoCapture(0)
 
-# Number of frames to use for prediction - considering CPU used, accuracy is compensated for speed of inference
+# Number of frames to use for prediction - considering CPU used, accuracy is compensated for speed of inference (Can be increased for better accuracy with the cost of load on CPU)
 frame_window_size = 16
 frame_buffer = []
-frame_skip = 10  # Skip more frames to reduce load
+frame_skip = 10  # Skip more frames to reduce load (we can use GPU for better performance and can reduce this value then for better accuracy)
 frame_count = 0
 
 while True:
@@ -41,7 +41,6 @@ while True:
             logits = outputs.logits
             predicted_class = torch.argmax(logits, dim=-1).item()
 
-        # Clear the buffer after making the prediction
         frame_buffer = []
 
         action_label = "Violence Detected" if predicted_class == 1 else "No Violence"

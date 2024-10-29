@@ -28,18 +28,16 @@ def check_video_format(video_path):
     codec_str = "".join([chr((codec >> 8 * i) & 0xFF) for i in range(4)])
     print(f"Video: {video_path}, Codec: {codec_str}")
     
-    if codec_str != 'mp4v':  # Adjust this based on your needs (e.g., check for H.264 or other codecs)
+    if codec_str != 'mp4v':
         print(f"Warning: {video_path} may not be in the correct format.")
         return False
     
     video.release()
     return True
 
-# Preprocess the video frames
 def preprocess_video(video_path, feature_extractor, num_frames=16):
     video = cv2.VideoCapture(video_path)
     
-    # Check if the video is opened successfully
     if not video.isOpened():
         print(f"Warning: {video_path} may not be in the correct format.")
         return None  # Return None to indicate failure to read the video
@@ -55,32 +53,29 @@ def preprocess_video(video_path, feature_extractor, num_frames=16):
         ret, frame = video.read()
         if not ret:
             break
-        frame_resized = cv2.resize(frame, (224, 224))  # Resize frames to 224x224
+        frame_resized = cv2.resize(frame, (224, 224))
         frames.append(frame_resized)
     
     video.release()
     
     if len(frames) < num_frames:
         print(f"Warning: {video_path} has fewer than {num_frames} frames. Padding with last frame.")
-        # Repeat the last frame if there aren't enough frames
         while len(frames) < num_frames:
             frames.append(frames[-1])
     
     try:
-        # Use feature extractor to preprocess frames
         inputs = feature_extractor(frames, return_tensors="pt")
         return inputs['pixel_values'] if 'pixel_values' in inputs else None
     except Exception as e:
         print(f"Error processing video {video_path}: {str(e)}")
         return None
 
-# Custom Iterable Dataset
 class VideoIterableDataset(IterableDataset):
     def __init__(self, video_paths, labels, feature_extractor):
         self.video_paths = video_paths
         self.labels = labels
         self.feature_extractor = feature_extractor
-        self.current_epoch = 0  # Use a different name
+        self.current_epoch = 0
 
     def set_epoch(self, epoch):
         self.current_epoch = epoch 
@@ -94,10 +89,10 @@ class VideoIterableDataset(IterableDataset):
 
         frames = preprocess_video(video_path, self.feature_extractor)
         if frames is None:
-            return None  # Handle invalid videos gracefully
+            return None
         
         return {
-            'pixel_values': frames.squeeze(),  # Ensure correct shape
+            'pixel_values': frames.squeeze(),
             'labels': torch.tensor(label, dtype=torch.long)
         }
 
@@ -139,10 +134,9 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=1,
     evaluation_strategy="epoch",
     logging_dir='./logs',
-    max_steps=525  # Adjust based on your dataset size and batch size
+    max_steps=525  # Adjust based on dataset size and batch size (this is just high for training)
 )
 
-# Define the Trainer for fine-tuning
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -150,10 +144,8 @@ trainer = Trainer(
     eval_dataset=eval_dataset,
 )
 
-# Fine-tune the model
 trainer.train()
 
-# After training, save the model
 trainer.save_model("./fine_tuned_videomae")
 
 print("Model training and fine-tuning complete.")
